@@ -16,7 +16,7 @@ func main() {
 	}
 	// listen and accept connections from clients:
 	resChan1, resChan2 := make(chan int, 1), make(chan int, 1)
-	openFilecnt := make(chan int, 700)
+	openFileCnt := make(chan int, 700)
 	// need to limit the no connections within the allowed open files
 	// in ubuntu it seems 1024 as default
 	for {
@@ -26,19 +26,19 @@ func main() {
 			return // terminate program
 		}
 		if len(resChan1) == len(resChan2) {
-			openFilecnt <- 1
-			go doServerStuff(conn, resChan1, resChan2, openFilecnt)
+			openFileCnt <- 1
+			go doServerStuff(conn, resChan1, resChan2, openFileCnt)
 		} else {
-			openFilecnt <- 1
-			go doServerStuff(conn, resChan2, resChan1, openFilecnt)
+			openFileCnt <- 1
+			go doServerStuff(conn, resChan2, resChan1, openFileCnt)
 		}
 	}
 }
 
-func doServerStuff(conn net.Conn, resChan1, resChan2, openFilecnt chan int) {
+func doServerStuff(conn net.Conn, resChan1, resChan2, openFileCnt chan int) {
 	defer func(chan int) {
-		<-openFilecnt
-	}(openFilecnt)
+		<-openFileCnt
+	}(openFileCnt)
 	buf := make([]byte, 512)
 	cnt, err := conn.Read(buf)
 	if err != nil {

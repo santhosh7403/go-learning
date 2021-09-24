@@ -11,7 +11,7 @@ func main() {
 
 	var wg sync.WaitGroup
 	resCh1, resCh2 := make(chan int, 2), make(chan int, 2)
-	openFilecnt := make(chan int, 700)
+	openFileCnt := make(chan int, 700)
 	for i := 0; i < 10000; i++ {
 		conn, err := net.Dial("tcp", "localhost:50000")
 		if err != nil {
@@ -21,19 +21,19 @@ func main() {
 		}
 		// time.Sleep(10 * time.Millisecond)
 		wg.Add(1)
-		openFilecnt <- 1
-		go runClient(conn, i, resCh1, resCh2, openFilecnt, &wg)
+		openFileCnt <- 1
+		go runClient(conn, i, resCh1, resCh2, openFileCnt, &wg)
 	}
 	// Wait till all dial returned back
 	wg.Wait()
 
 }
 
-func runClient(conn net.Conn, id int, res1, res2, openFilecnt chan int, wg *sync.WaitGroup) {
+func runClient(conn net.Conn, id int, res1, res2, openFileCnt chan int, wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer func(chan int) {
-		<-openFilecnt
-	}(openFilecnt)
+		<-openFileCnt
+	}(openFileCnt)
 
 	fmt.Println("This is Dial ID:", id)
 	//  unblock at the start
