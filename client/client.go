@@ -43,50 +43,33 @@ func runClient(conn net.Conn, id int, res1, res2, openFilecnt chan int, wg *sync
 	select {
 
 	case val1 := <-res1:
-
-		recv := strconv.Itoa(val1)
-		fmt.Printf("Received-> %s\n", recv)
-
-		fmt.Println("Sending to the server = " + recv)
-		conn.Write([]byte(recv))
-		buf := make([]byte, 512)
-		cnt, err := conn.Read(buf)
-		if err != nil {
-			fmt.Println("Finished reading", err.Error())
-			return // terminate program
-		}
-		inp, err := strconv.Atoi(string(buf[:cnt]))
-		if err != nil {
-			fmt.Println("Atoi error", err.Error())
-		} else {
-			res2 <- inp
-		}
-		fmt.Println("Received from server = ", string(buf))
-		conn.Close() // clean connections ; which also remove open files
-		return
+		talkToServer(val1, conn, res2)
 
 	case val2 := <-res2:
-
-		recv := strconv.Itoa(val2)
-		fmt.Printf("Received-> %s\n", recv)
-
-		fmt.Println("Sending to the server = " + recv)
-		conn.Write([]byte(recv))
-		buf := make([]byte, 512)
-		cnt, err := conn.Read(buf)
-		if err != nil {
-			fmt.Println("Finished reading", err.Error())
-			return // terminate program
-		}
-		inp, err := strconv.Atoi(string(buf[:cnt]))
-		if err != nil {
-			fmt.Println("Atoi error", err.Error())
-		} else {
-			res1 <- inp
-		}
-
-		fmt.Println("Received from server = ", string(buf))
-		conn.Close() // clean connections ; which also remove open files
-		return
+		talkToServer(val2, conn, res1)
 	}
+}
+
+func talkToServer(val int, conn net.Conn, res chan int) {
+	recv := strconv.Itoa(val)
+	fmt.Printf("Received-> %s\n", recv)
+
+	fmt.Println("Sending to the server = " + recv)
+	conn.Write([]byte(recv))
+	buf := make([]byte, 512)
+	cnt, err := conn.Read(buf)
+	if err != nil {
+		fmt.Println("Finished reading", err.Error())
+		return // terminate program
+	}
+	inp, err := strconv.Atoi(string(buf[:cnt]))
+	if err != nil {
+		fmt.Println("Atoi error", err.Error())
+	} else {
+		res <- inp
+	}
+
+	fmt.Println("Received from server = ", string(buf))
+	conn.Close() // clean connections ; which also remove open files
+	return
 }
